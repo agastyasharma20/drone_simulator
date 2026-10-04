@@ -1,9 +1,31 @@
-MIT License
+SKYSHIELD PROPRIETARY LICENSE — ALL RIGHTS RESERVED
 
-Copyright (c) 2026 Agastya Sharma
+Copyright (c) 2026 Agastya Sharma. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+1. OWNERSHIP. This repository and everything in it, including source code, scenario data, scoring logic, database schemas, user-interface assets, documentation, tests, build and deployment files, and the name "SKYSHIELD" (together, the "Work"), is the exclusive property of the copyright holder. No right, title or licence is granted to you except the limited permission in clause 2.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+2. VIEWING ONLY. You may read the Work solely to evaluate it (for example, as a judge, reviewer or evaluator of the Smart India Hackathon 2026 or a similar competition). No other use is permitted.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+3. PROHIBITED WITHOUT PRIOR WRITTEN PERMISSION. You may not, in whole or in part, including any single line, function, identifier, algorithm, data structure, scenario, scoring rule, schema, asset or text:
+   a. copy, reproduce, paste, transcribe or retype it;
+   b. modify, adapt, translate, port, refactor, obfuscate or create derivative works from it;
+   c. run, deploy, host, or offer it as a service, internally or externally, commercially or not;
+   d. distribute, publish, sublicense, sell, lease, lend or otherwise make it available to any third party;
+   e. fork or mirror it, other than the automatic copies that GitHub's platform terms require;
+   f. use it, its outputs or its design to train, fine-tune, evaluate or prompt any machine-learning or AI system, or to build a dataset;
+   g. scrape, crawl or bulk-download it by automated means;
+   h. reverse-engineer it or re-implement its behaviour, structure or design from it;
+   i. remove or alter any copyright, licence or attribution notice;
+   j. use the name SKYSHIELD or the author's name to promote any product or service.
+
+4. NO OPEN-SOURCE GRANT. Making this repository publicly visible does not grant any open-source or other licence. Absent a signed written agreement from the copyright holder, all rights not expressly granted here are reserved.
+
+5. THIRD-PARTY WORKS. Third-party libraries listed in the dependency files remain under their own licences. This licence does not apply to them and does not restrict your rights in them.
+
+6. TERMINATION. Any breach ends the permission in clause 2 immediately and automatically. On termination you must delete all copies of the Work in your possession.
+
+7. NO WARRANTY; LIMITATION OF LIABILITY. THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. THE COPYRIGHT HOLDER IS NOT LIABLE FOR ANY CLAIM OR DAMAGE ARISING FROM THE WORK OR ITS USE. THE WORK IS A TRAINING-SIMULATION PROTOTYPE USING ILLUSTRATIVE VALUES AND IS NOT FOR OPERATIONAL OR SAFETY-CRITICAL USE.
+
+8. ENFORCEMENT. Unauthorised use may infringe copyright and related rights under the Copyright Act, 1957 (India) and equivalent laws elsewhere, and the copyright holder reserves all remedies, including injunctive relief.
+
+For permission requests, contact the copyright holder through the owner's GitHub profile.
