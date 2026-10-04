@@ -1,0 +1,124 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SKYSHIELD – C-UAS Threat Simulation Trainer</title>
+<style>
+:root{--bg:#eef3f0;--pn:#fff;--ln:#c5d6cc;--fg:#10241a;--mu:#52695c;--ac:#0a8a43;--bd:#c62828;--wr:#b36b00;--in:#0b6fb8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070d0a;--pn:#0e1814;--ln:#1f3a2c;--fg:#cdeedd;--mu:#7fa592;--ac:#3dff8a;--bd:#ff5c5c;--wr:#ffb020;--in:#4db8ff}}
+:root[data-theme="dark"]{--bg:#070d0a;--pn:#0e1814;--ln:#1f3a2c;--fg:#cdeedd;--mu:#7fa592;--ac:#3dff8a;--bd:#ff5c5c;--wr:#ffb020;--in:#4db8ff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--ln)}
+header b{color:var(--ac);letter-spacing:.14em;font-size:17px}header span,.mu{color:var(--mu);font-size:12px}
+input,select,button{font:inherit;color:var(--fg);background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:6px 9px}
+button{cursor:pointer}button:hover:not(:disabled){border-color:var(--ac)}button:disabled{opacity:.4}
+main{display:grid;grid-template-columns:minmax(0,640px) minmax(300px,1fr);gap:14px;padding:14px;max-width:1200px;margin:auto}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+canvas{width:100%;aspect-ratio:1;background:#06140f;border:1px solid var(--ln);border-radius:10px;cursor:crosshair;display:block}
+#hud{font:12px monospace;color:var(--mu);margin:8px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#log{font:12px monospace;min-height:96px}#log div{padding:1px 0}.bad{color:var(--bd)}.warn{color:var(--wr)}.ok{color:var(--ac)}
+aside{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:12px;min-width:0}
+nav{display:flex;gap:6px;margin-bottom:10px}nav button.on{background:var(--ac);color:#04140b;border-color:var(--ac)}
+.tab.hid{display:none}h3{margin:.2em 0 .5em;font-size:15px}h4{margin:12px 0 6px;font-size:12px;color:var(--mu);letter-spacing:.08em}
+.row{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin:5px 0}
+.bt{display:flex;flex-wrap:wrap;gap:6px}.bt button{flex:1 1 44%}
+.go{width:100%;margin-top:10px;background:var(--ac);color:#04140b;border-color:var(--ac);font-weight:700;padding:10px}
+table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:4px 6px;border-bottom:1px solid var(--ln);text-align:left}
+.kv td:first-child{color:var(--mu);width:80px}.wrap{overflow-x:auto}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px}.kpi div{border:1px solid var(--ln);border-radius:8px;padding:8px}.kpi b{display:block;font-size:20px;color:var(--ac)}
+.bars{display:flex;gap:4px;align-items:flex-end;height:80px;border-bottom:1px solid var(--ln)}.bars i{flex:1;background:var(--in);min-height:2px;border-radius:3px 3px 0 0}
+</style></head><body>
+<header><div><b>SKYSHIELD</b> <span>AI-enabled drone &amp; counter-drone threat trainer · SIH 2026 · PS 26247 · MoD / DSSC</span></div><div><label class=mu>Callsign <input id=cs value="ALPHA-1" size=9></label> <label class=mu>Unit <input id=unit value="1 PARA" size=9></label></div></header>
+<main><section><canvas id=cv></canvas>
+<div id=hud><span id=hs>STANDBY</span><button id=pz>Pause</button><button id=sp>1×</button><button id=en>End</button></div><div id=log></div></section>
+<aside><nav><button data-t=brief class=on>Brief</button><button data-t=trk>Track</button><button data-t=aar>AAR</button></nav>
+<div id=brief class=tab>
+<h4>SCRIPTED SCENARIOS</h4><div class=bt><button data-p=recon>Recon Probe</button><button data-p=swarm>Swarm Saturation</button><button data-p=night>Night Infiltration</button><button data-p=urban>Urban Clutter</button><button data-p=proc style="flex-basis:100%">🎲 Fully procedural</button></div>
+<h4>CONFIGURE</h4>
+<div class=row>Threat<select id=mode><option value=single>Single recon<option value=mixed selected>Mixed raid + decoys<option value=swarm>Swarm attack<option value=rand>Random</select></div>
+<div class=row>Terrain<select id=ter><option value=rural>Rural<option value=urban>Urban (clutter)<option value=rand>Random</select></div>
+<div class=row>Time<select id=tod><option value=day>Day<option value=night>Night (EO degraded)<option value=rand>Random</select></div>
+<div class=row>Sensors<select id=sen><option value=nom>Nominal<option value=deg>Degraded<option value=rand>Random</select></div>
+<div class=row>Difficulty<select id=lv><option value=auto>Adaptive (auto)<option>1<option>2<option>3<option>4<option>5</select></div>
+<div class=row>Seed<input id=seed placeholder="blank = new random layout"></div>
+<button class=go id=go>▶ START SESSION</button>
+<h4>DRILL</h4><p class=mu>1) Click a blip to <b>tag</b> it (detection time is scored). 2) <b>Classify</b> it from radar/RF/IFF/pattern cues (keys 1–6). 3) <b>Decide</b>: Monitor R · Warn Q · Jam W (inside warning ring, 6 s cooldown) · Intercept E (6 rounds). Engaging friendlies, birds or ghost tracks is penalised. Space = pause.</p></div>
+<div id=trk class="tab hid"></div><div id=aar class="tab hid"><p class=mu>Complete a session to see your after-action review.</p></div></aside></main>
+<script>
+const $=s=>document.querySelector(s),W=640,R=300,Z=[200,110],C=$('#cv'),X=C.getContext('2d');C.width=C.height=W;
+const T={quad:{n:'Quadcopter',v:14,h:1,rf:1,s:'QUAD'},fw:{n:'Fixed-wing',v:26,h:1,rf:1,s:'FW'},lm:{n:'Loitering munition',v:38,h:1,rf:0,s:'LM',auto:1},bird:{n:'Bird flock',v:9,h:0,rf:0,s:'BIRD'},fr:{n:'Friendly UAS',v:16,h:0,rf:1,s:'FRND'},cl:{n:'False track',v:6,h:0,rf:0,s:'CLTR'}},KEYS=['quad','fw','lm','bird','fr','cl'];
+let S={run:0,cfg:{night:0,ter:'rural'},terr:[],cs:[],ang:0,t:0,log:[]};
+const P={recon:['single','rural','day','nom','1'],swarm:['swarm','rural','day','nom','auto'],night:['mixed','rural','night','deg','auto'],urban:['mixed','urban','day','deg','auto'],proc:['rand','rand','rand','rand','auto']};
+const lg=(m,c='')=>{S.log.unshift([m,c]);S.log.length=Math.min(S.log.length,6);$('#log').innerHTML=S.log.map(l=>`<div class="${l[1]}">${l[0]}</div>`).join('')};
+async function start(){const g=i=>$('#'+i).value;let d;
+try{const res=await fetch('/api/scenarios/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({callsign:$('#cs').value||'TRAINEE',unit:$('#unit').value||'UNIT-1',mode:g('mode'),terrain:g('ter'),time:g('tod'),sensors:g('sen'),level:g('lv'),seed:+g('seed')||null})});if(!res.ok)throw 0;d=await res.json()}
+catch(e){return lg('Backend unreachable or request rejected — see README to run the API','bad')}
+S={run:1,t:0,dur:d.duration,cfg:d.config,sid:d.session_id,cs:[],sp:d.spawns.slice(),ang:0,ammo:6,jcd:0,sel:null,pause:0,log:[],sp1:1,terr:d.terrain,fr:0,waste:0,breach:0};
+tab('trk');trk();lg('Session #'+d.session_id+' live — seed '+d.config.seed+'. Tag, classify, decide.','ok')}
+function spawn(p){return{id:p.id,type:p.type,intent:p.intent,hostile:T[p.type].h,v:p.v,x:p.x,y:p.y,hd:p.hd,life:p.life,spd:p.spd,sig:p.sig,kn:p.kn,seen:null,trail:[],st:'act',call:null,act:null,td:null,ts:null,age:0}}
+function step(dt){const s=S,cfg=s.cfg;s.t+=dt;s.jcd=Math.max(0,s.jcd-dt);
+while(s.sp.length&&s.sp[0].t<=s.t)s.cs.push(spawn(s.sp.shift()));
+const pa=s.ang;s.ang=(pa+dt*6.283/(cfg.deg?5:3.5))%6.283;
+for(const c of s.cs){if(c.st!=='act')continue;c.age+=dt;
+if(c.type==='cl'){c.life-=dt;c.hd+=(Math.random()-.5)*dt*3;if(c.life<=0){c.st='gone';c.te=s.t;continue}}else if(c.type==='bird')c.hd+=(Math.random()-.5)*dt*5;
+if(c.intent==='recon'&&!c.rep&&Math.hypot(c.x,c.y)<135){const a=Math.atan2(c.y,c.x)+c.v*dt/135;c.x=135*Math.cos(a);c.y=135*Math.sin(a)}else{c.x+=Math.cos(c.hd)*c.v*dt;c.y+=Math.sin(c.hd)*c.v*dt}
+const d=Math.hypot(c.x,c.y);
+if(c.intent==='attack'&&d<14){c.st='breach';c.te=s.t;s.breach++;lg('⚠ BREACH — T'+c.id+' reached the asset','bad');continue}
+if(c.age>4&&d>R+12){c.st='left';c.te=s.t;continue}
+const th=(Math.atan2(c.y,c.x)+6.283)%6.283,cr=pa<=s.ang?(th>=pa&&th<s.ang):(th>=pa||th<s.ang);
+if(cr&&d<R&&!(cfg.deg&&Math.random()<.25)){const n=cfg.deg?14:5;c.seen={x:c.x+(Math.random()-.5)*n,y:c.y+(Math.random()-.5)*n,t:s.t};c.trail.push([c.seen.x,c.seen.y]);if(c.trail.length>6)c.trail.shift();if(c.ts==null)c.ts=s.t}}
+if(s.t>=s.dur)finish()}
+function pick(e){const b=C.getBoundingClientRect(),x=(e.clientX-b.left)*W/b.width-W/2,y=(e.clientY-b.top)*W/b.height-W/2;let best=null,bd=22;
+for(const c of S.cs)if(c.st==='act'&&c.seen){const d=Math.hypot(c.seen.x-x,c.seen.y-y);if(d<bd){bd=d;best=c}}
+if(best){S.sel=best.id;if(best.td==null){best.td=S.t;lg('T'+best.id+' tagged ('+(S.t-best.ts).toFixed(1)+' s after first paint)')}tab('trk');trk()}}
+function cur(){return S.cs.find(x=>x.id===S.sel)}
+function cls(i){const c=cur();if(!c||c.st!=='act'||c.call)return;c.call=KEYS[i];lg('T'+c.id+' classified '+T[c.call].n+(c.call===c.type?' ✔':' ✘'),c.call===c.type?'ok':'warn');trk()}
+function act(a){const c=cur();if(!c||c.st!=='act')return;if(!c.call)return lg('Classify the track first','warn');
+const d=Math.hypot(c.x,c.y),kill=why=>{c.st='neut';c.te=S.t;if(c.type==='fr'){S.fr++;lg('✘ FRATRICIDE — friendly T'+c.id+' destroyed','bad')}else if(!c.hostile){S.waste++;lg('✘ Non-threat T'+c.id+' engaged (waste)','bad')}else lg('✔ T'+c.id+' neutralised ('+why+')','ok')};
+if(a==='mon'){c.act='mon';lg('T'+c.id+' → MONITOR')}
+else if(a==='warn'){c.act='warn';if(c.intent==='recon'){c.rep=1;c.hd=Math.atan2(c.y,c.x);lg('T'+c.id+' warned — withdrawing','ok')}else lg('T'+c.id+' warned — no reaction','warn')}
+else if(a==='jam'){if(d>Z[0])return lg('Out of jammer range (warning ring only)','warn');if(S.jcd>0)return lg('Jammer cooling down','warn');S.jcd=6;c.act='jam';T[c.type].rf?kill('RF/GNSS jam'):lg('Jam had no effect — autonomous guidance','warn')}
+else{if(!S.ammo)return lg('No interceptors left','bad');S.ammo--;c.act='int';Math.random()<.85?kill('interceptor'):lg('Interceptor missed','warn')}trk()}
+function trk(){const c=S.cs&&cur(),e=$('#trk');if(!c){e.innerHTML='<p class=mu>Click a blip on the scope to tag it.</p>';return}
+const g=(f,v)=>c.kn[f]?v:'<i class=mu>? (degraded)</i>';
+e.innerHTML=`<h3>TRACK T${c.id} <span id=rg class=mu></span></h3><table class=kv><tr><td>Speed<td>${c.spd} km/h<tr><td>Altitude<td>${g('alt',c.sig.alt)}<tr><td>RCS<td>${g('rcs',c.sig.rcs)}<tr><td>RF<td>${g('rf',c.sig.rf)}<tr><td>IFF<td>${g('iff',c.sig.iff)}<tr><td>Pattern<td>${g('pat',c.sig.pat)}</table>
+<h4>1 · CLASSIFY ${c.call?'(locked)':''}</h4><div class=bt>${KEYS.map((k,i)=>`<button data-c=${i} ${c.call?'disabled':''}>${i+1} ${T[k].n}</button>`).join('')}</div>
+<h4>2 · DECIDE ${c.st!=='act'?'(track closed)':''}</h4><div class=bt><button data-a=mon>R Monitor</button><button data-a=warn>Q Warn</button><button data-a=jam>W Jam (EW)</button><button data-a=int>E Intercept</button></div>`}
+async function finish(){const s=S;if(!s.run)return;s.run=0;
+const tracks=s.cs.map(c=>({id:c.id,call:c.call,act:c.act,ts:c.ts,td:c.td,outcome:c.st}));
+try{const res=await fetch('/api/sessions/'+s.sid+'/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tracks})});if(!res.ok)throw 0;renderAAR(await res.json())}
+catch(e){lg('Could not save the session to the backend','bad')}}
+function renderAAR(d){const m=d.summary,rows=d.tracks.map(r=>`<tr><td>T${r.id}<td>${T[r.truth].n}${r.intent?' ('+r.intent+')':''}<td>${r.call?T[r.call].s:'—'}<td>${r.action||'—'} / <b>${r.optimal}</b><td>${r.t_detect==null?'missed':r.t_detect.toFixed(1)+'s'}<td>${Math.round(r.grade*100)}%<td>${r.outcome}`).join('');
+const c=m.config;$('#aar').innerHTML=`<h3>AFTER-ACTION REVIEW — ${m.rank}</h3><div class=kpi><div>Score<b>${m.score}</b></div><div>Detection<b>${m.det_avg_s==null?'—':m.det_avg_s+'s'}</b>avg tag time</div><div>Classification<b>${m.cls_pct}%</b></div><div>Decisions<b>${m.dec_pct}%</b></div><div>Breaches<b>${m.breaches}</b></div><div>Fratricide / waste<b>${m.fratricide} / ${m.waste}</b></div></div>
+<p class=mu>${c.night?'Night':'Day'}, ${c.ter}, ${c.deg?'degraded':'nominal'} sensors · level ${m.level} → next session <b>level ${m.next_level}</b> · seed ${c.seed} · session #${m.session_id} (stored in DB)</p>
+<h4>PER-TRACK DEBRIEF (your action / optimal)</h4><div class=wrap><table><tr><th>ID<th>Truth<th>Call<th>Action<th>Tag<th>Dec.<th>Outcome${rows}</table></div>
+<h4>DECISION TREE USED FOR SCORING</h4><p class=mu>IFF friendly → MONITOR · no RF + erratic → bird (MONITOR) · intermittent → clutter (MONITOR) · RF link, slow, steady → quad/fixed-wing · no RF, fast, low → loitering munition. Recon → WARN (jam acceptable) · armed with link → JAM (intercept acceptable) · autonomous attacker → INTERCEPT. Score = 30% detection time + 30% classification + 40% engagement decision − breach/fratricide penalties. Scored server-side against stored ground truth.</p>
+<h4>${d.trainee.callsign} · LAST ${d.history.length} SESSIONS</h4><div class=bars>${d.history.map(h=>`<i style="height:${h.score}%" title="${h.score} (L${h.level})"></i>`).join('')}</div>
+<div class=wrap><table><tr><th>#<th>Mode<th>Lvl<th>Score<th>Det<th>Cls<th>Dec${d.history.slice().reverse().map(h=>`<tr><td>${h.session_id}<td>${h.mode}<td>${h.level}<td>${h.score}<td>${h.det_pct}%<td>${h.cls_pct}%<td>${h.dec_pct}%`).join('')}</table></div>
+<h4>UNIT BOARD — ${d.trainee.unit}</h4><table><tr><th>Callsign<th>Sessions<th>Avg score${d.leaderboard.map(b=>`<tr><td>${b.callsign}<td>${b.sessions}<td>${b.avg}`).join('')}</table><button id=clr style="margin-top:8px">Reset my history</button>`;tab('aar')}
+function tab(t){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('.tab').forEach(d=>d.classList.toggle('hid',d.id!==t))}
+function draw(){const s=S,n=s.cfg.night;X.setTransform(1,0,0,1,0,0);X.fillStyle=n?'#01080a':'#06140f';X.fillRect(0,0,W,W);X.translate(W/2,W/2);
+for(const t of s.terr){X.fillStyle=s.cfg.ter==='urban'?'rgba(140,160,150,.16)':'rgba(61,255,138,.08)';if(t.w)X.fillRect(t.x,t.y,t.w,t.h);else{X.beginPath();X.arc(t.x,t.y,t.r,0,6.3);X.fill()}}
+X.lineWidth=1;[R,Z[0],Z[1]].forEach((r,i)=>{X.strokeStyle=['#1f5b3c','#a67a1a','#9b2f2f'][i];X.setLineDash(i?[6,5]:[]);X.beginPath();X.arc(0,0,r,0,6.3);X.stroke()});X.setLineDash([]);
+X.fillStyle='#7fa592';X.font='11px monospace';X.fillText('DETECT 5 km',-30,-R+14);X.fillText('WARN 3.3 km',-30,-Z[0]+14);X.fillText('ENGAGE 1.8 km',-34,-Z[1]+14);
+X.lineWidth=7;for(let i=0;i<18;i++){X.strokeStyle=`rgba(61,255,138,${.4-i*.022})`;X.beginPath();X.moveTo(0,0);const a=s.ang-i*.025;X.lineTo(R*Math.cos(a),R*Math.sin(a));X.stroke()}X.lineWidth=1.5;
+X.strokeStyle='#3dff8a';X.beginPath();X.moveTo(0,-9);X.lineTo(8,6);X.lineTo(-8,6);X.closePath();X.stroke();
+for(const c of s.cs){if(!c.seen)continue;const p=c.seen;
+if(c.st!=='act'){if((c.st==='neut'||c.st==='breach')&&s.t-c.te<4){X.strokeStyle=c.st==='neut'?'#8a9':'#ff4d4d';X.beginPath();X.moveTo(p.x-6,p.y-6);X.lineTo(p.x+6,p.y+6);X.moveTo(p.x+6,p.y-6);X.lineTo(p.x-6,p.y+6);X.stroke()}continue}
+const k=Math.max(.3,1-(s.t-p.t)/6),col=!c.call?'#ffd23d':T[c.call].h?'#ff5c5c':c.call==='cl'?'#99aaa0':'#4db8ff';X.globalAlpha=k;X.fillStyle=col;X.strokeStyle=col;
+c.trail.forEach(q=>X.fillRect(q[0]-1,q[1]-1,2,2));X.beginPath();
+if(!c.call)X.rect(p.x-5,p.y-5,10,10);else if(T[c.call].h){X.moveTo(p.x,p.y-7);X.lineTo(p.x+7,p.y);X.lineTo(p.x,p.y+7);X.lineTo(p.x-7,p.y);X.closePath()}else X.arc(p.x,p.y,6,0,6.3);X.stroke();
+X.fillText('T'+c.id+(c.call?' '+T[c.call].s:''),p.x+10,p.y-8);
+if(c.id===s.sel){X.globalAlpha=1;X.strokeStyle='#fff';X.setLineDash([3,3]);X.beginPath();X.arc(p.x,p.y,14,0,6.3);X.stroke();X.setLineDash([])}X.globalAlpha=1}
+if(n){X.fillStyle='rgba(0,40,20,.18)';X.fillRect(-W/2,-W/2,W,W)}}
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+if(S.run&&!S.pause)for(let i=0;i<S.sp1;i++)step(dt);else if(!S.run)S.ang=(S.ang+dt*1.8)%6.283;
+draw();const c=S.run&&cur();
+$('#hs').textContent=S.run?`T+${S.t|0}/${S.dur}s · L${S.cfg.level} · ${S.cfg.night?'NIGHT':'DAY'} · ${S.cfg.ter} · ${S.cfg.deg?'DEGRADED':'NOMINAL'} · INT ${S.ammo} · JAM ${S.jcd>0?S.jcd.toFixed(0)+'s':'RDY'}${S.pause?' · PAUSED':''}`:'STANDBY — configure a scenario and start';
+const rg=$('#rg');if(c&&rg&&c.seen)rg.textContent=`${(Math.hypot(c.seen.x,c.seen.y)/60).toFixed(1)} km · brg ${((Math.atan2(c.seen.x,-c.seen.y)*57.3+360)|0)%360}°`;requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+C.addEventListener('click',e=>S.run&&pick(e));
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+if(d.t)tab(d.t);else if(d.c)cls(+d.c);else if(d.a)act(d.a);else if(d.p){const v=P[d.p];['mode','ter','tod','sen','lv'].forEach((id,i)=>$('#'+id).value=v[i]);$('#seed').value='';start()}
+else if(b.id==='go')start();else if(b.id==='pz')S.pause=!S.pause;else if(b.id==='sp'){S.sp1=S.sp1===1?2:1;b.textContent=S.sp1+'×'}else if(b.id==='en')finish();else if(b.id==='clr'){fetch('/api/trainees/'+encodeURIComponent($('#cs').value.trim())+'/history',{method:'DELETE'}).then(()=>{$('#aar').innerHTML='<p class=mu>History reset.</p>'})}});
+document.addEventListener('keydown',e=>{if(!S.run||/INPUT|SELECT/.test(e.target.tagName))return;const k=e.key.toLowerCase();
+if(k>='1'&&k<='6')cls(+k-1);else if(k==='q')act('warn');else if(k==='w')act('jam');else if(k==='e')act('int');else if(k==='r')act('mon');else if(k===' '){S.pause=!S.pause;e.preventDefault()}});
+</script></body></html>

@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: sky, POSTGRES_PASSWORD: sky, POSTGRES_DB: skyshield }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U sky -d skyshield"], interval: 3s, retries: 15 }
+  api:
+    build: .
+    environment: { DATABASE_URL: "postgresql+psycopg2://sky:sky@db:5432/skyshield" }
+    ports: ["8000:8000"]
+    depends_on: { db: { condition: service_healthy } }
+volumes: { pgdata: {} }
